@@ -37,21 +37,26 @@ pipeline {
                 }
             }
         }
+        
+        stage('Clean Up and Stop Old Containers') {
+            steps {
+                script {
+                    echo "--- STARTING DEEP CLEAN UP ---"
+                    // ลบ Container ที่มีการกำหนดชื่อเฉพาะเจาะจงใน docker-compose.yml
+                    sh 'docker rm -f node_exporter_c || true'
+                    sh 'docker rm -f prometheus_c || true'
+                    sh 'docker rm -f grafana_c || true'
+                    sh 'docker rm -f pettrack_nginx_c || true'
+                    sh 'docker rm -f nginx_exporter_c || true'
 
-        stages {
-            stage('Clean Up and Stop Old Containers') {
-                steps {
-                    script {
-                        
-                        sh 'docker compose down -v' 
+                    // ลบ Container และ Network ทั้งหมดของ Project นี้ (รวม Volume ด้วย)
+                    sh 'docker compose down -v --remove-orphans || true' 
 
-                        sh 'docker rm -f node_exporter_c || true'
-                        sh 'docker rm -f prometheus_c || true'
-                        sh 'docker rm -f grafana_c || true'
-                        sh 'docker rm -f pettrack_nginx_c || true'
-                        sh 'docker rm -f nginx_exporter_c || true'
-
-                    }
+                    // ลบชื่อ Container เก่าๆ ที่อาจจะยังค้างอยู่
+                    sh 'docker rm -f pettrack_node_exporter || true'
+                    sh 'docker rm -f pettrack_nginx_exporter || true'
+                    sh 'docker rm -f pettrack_prometheus || true'
+                    sh 'docker rm -f pettrack_grafana || true'
                 }
             }
         }
@@ -59,19 +64,8 @@ pipeline {
         stage('Deploy with Docker Compose') {
             steps {
                 dir('.') {
-                    echo "--- FORCE CLEANUP BEFORE DEPLOY ---"
-
-                    sh 'docker rm -f pettrack_node_exporter || true'
-                    sh 'docker rm -f pettrack_nginx_exporter || true'
-                    sh 'docker rm -f pettrack_prometheus || true'
-                    sh 'docker rm -f pettrack_grafana || true'
-
-                    sh 'docker compose down -v --remove-orphans || true' 
-        
                     echo "--- STARTING FRESH DEPLOY ---"
-
-                    sh 'docker compose up -d' 
-
+                    sh 'docker compose up -d'
                 }
             }
         }
