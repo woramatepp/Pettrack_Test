@@ -7,7 +7,6 @@ pipeline {
         USER_IMAGE     = 'it66070178/user:latest'
         FRONTEND_IMAGE = 'it66070178/frontend:latest'
         DOCKER_CREDENTIALS = credentials('dockerhub')
-        COMPOSE_FILE = '/home/poomworamet2004/Pettrack_Test/docker-compose.yml'
     }
 
     stages {
@@ -47,10 +46,9 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                script {
-                    sh 'sudo docker network rm express-network || true'
-                    sh 'sudo docker compose --env-file /dev/null down --remove-orphans'
-                    sh 'sudo docker compose --env-file /dev/null up -d --build'
+                dir('.') {
+                    sh 'docker compose down --remove-orphans || true'
+                    sh 'docker compose up -d --build'
                 }
             }
         }
