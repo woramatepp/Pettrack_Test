@@ -86,7 +86,7 @@ services:
       - node_exporter
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:10.4.4-ubuntu 
     container_name: grafana_c
     user: "472"
     ports:
