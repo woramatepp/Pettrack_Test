@@ -7,75 +7,73 @@ pipeline {
         USER_IMAGE     = 'it66070178/user:latest'
         FRONTEND_IMAGE = 'it66070178/frontend:latest'
         DOCKER_CREDENTIALS = credentials('dockerhub')
-        SUDO_PASSWORD = credentials('jenkins-sudo')
     }
 
     stages {
         stage('Start Jenkins') {
             steps {
-                echo "🚀 Starting Jenkins Pipeline..."
-                echo "Using DockerHub user: $DOCKER_CREDENTIALS_USR"
+                echo "Starting Jenkins Pipeline..."
+                echo "Docker credentials user: $DOCKER_CREDENTIALS_USR"
             }
         }
 
         stage('Build Docker Images') {
             steps {
-                sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $LOCATION_IMAGE ./location-service
-                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $PET_IMAGE ./pet-service
-                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $USER_IMAGE ./user-service
-                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $FRONTEND_IMAGE .
-                '''
+                dir('./location-service') { sh 'docker build -t $LOCATION_IMAGE .' }
+                dir('./pet-service') { sh 'docker build -t $PET_IMAGE .' }
+                dir('./user-service') { sh 'docker build -t $USER_IMAGE .' }
+                dir('.') { sh 'docker build -t $FRONTEND_IMAGE .' }
             }
         }
 
         stage('Push Docker Images') {
             steps {
-                sh '''
-                    echo "$DOCKER_CREDENTIALS_PSW" | docker login -u "$DOCKER_CREDENTIALS_USR" --password-stdin
-                    docker push $LOCATION_IMAGE
-                    docker push $PET_IMAGE
-                    docker push $USER_IMAGE
-                    docker push $FRONTEND_IMAGE
-                    docker logout || true
-                '''
+                script {
+                    sh 'echo $DOCKER_CREDENTIALS_PSW | docker login --username $DOCKER_CREDENTIALS_USR --password-stdin'
+                    sh 'docker push $LOCATION_IMAGE'
+                    sh 'docker push $PET_IMAGE'
+                    sh 'docker push $USER_IMAGE'
+                    sh 'docker push $FRONTEND_IMAGE'
+                }
             }
         }
 
         stage('Clean Old Containers') {
             steps {
                 sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker ps -a -q --filter "name=pettrack-" | xargs -r sudo docker rm -f || true
+                echo "Stopping and removing old pettrack containers..."
+                docker ps -a -q --filter "name=pettrack-" | xargs -r docker rm -f
                 '''
             }
         }
 
         stage('Deploy with Docker Compose') {
             steps {
-                sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker network rm express-network || true
-                    echo "$SUDO_PASSWORD" | sudo -S docker compose down --remove-orphans || true
-                    echo "$SUDO_PASSWORD" | sudo -S docker compose up -d --build
-                '''
+                dir('.') {
+                    // ลบ network ถ้ามีแล้ว
+                    sh 'docker network rm express-network || true'
+
+                    // ลบ compose orphan containers
+                    sh 'docker compose down --remove-orphans'
+
+                    // สร้าง container ใหม่
+                    sh 'docker compose up -d --build'
+                }
             }
         }
 
         stage('Clean Docker System') {
             steps {
-                sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker container prune -f || true
-                    echo "$SUDO_PASSWORD" | sudo -S docker image prune -f || true
-                '''
+                sh 'docker container prune -f'
+                sh 'docker image prune -f'
             }
         }
+    }
 
-        stage('Final Cleanup') {
-            steps {
-                echo "🧹 Final cleanup after build..."
-                sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker logout || true
-                '''
-            }
+    post {
+        always {
+            echo "Logging out from Docker..."
+            sh 'docker logout'
         }
     }
 }
