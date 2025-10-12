@@ -6,7 +6,7 @@ pipeline {
         LOCATION_IMAGE = 'it66070178/location:latest'
         PET_IMAGE      = 'it66070178/pet:latest'
         USER_IMAGE     = 'it66070178/user:latest'
-        FRONTEND_IMAGE = 'it66070178/frontend:latest'
+        // FRONTEND_IMAGE = 'it66070178/frontend:latest'
         DOCKER_CREDENTIALS = credentials('dockerhub')
     }
 
