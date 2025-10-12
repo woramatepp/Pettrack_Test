@@ -11,7 +11,4 @@ services:
     build: ./user-service
     ports:
       - "8093:5000"
-  frontend:
-    build: .
-    ports:
-      - "8090:80"
+
