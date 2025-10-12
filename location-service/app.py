@@ -63,4 +63,5 @@ def log_location():
 
 # --- Run Application ---
 if __name__ == '__main__':
+    public_url = ngrok.connect(5000)
     app.run(host='0.0.0.0', port=5000, debug=True)
