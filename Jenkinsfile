@@ -57,7 +57,7 @@ pipeline {
                     sh 'docker compose down --remove-orphans'
 
                     // สร้าง container ใหม่
-                    sh 'docker compose up -d'
+                    sh 'docker compose up -d --build'
                 }
             }
         }
