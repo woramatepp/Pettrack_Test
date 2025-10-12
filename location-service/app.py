@@ -7,7 +7,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-DATABASE_URL = "postgresql://postgres:ta61389040@localhost:5432/pettrack"
 #DATABASE_URL = "postgresql://`user`:`password`@localhost:5432/pettrack" # 👈 แก้ไขตรงนี้
 
 # --- Routes ---
