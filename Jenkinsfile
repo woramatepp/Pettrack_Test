@@ -38,14 +38,22 @@ pipeline {
             }
         }
 
-        stage('Clean Old Containers') {
-            steps {
-                sh '''
-                echo "Stopping and removing old pettrack containers..."
-                docker ps -a -q --filter "name=pettrack-" | xargs -r docker rm -f
-                '''
+        stages {
+            stage('Clean Up and Stop Old Containers') {
+                steps {
+                    script {
+                        // 1. ลองหยุดและลบ Container ด้วย docker compose (รวม volume ด้วย)
+                        sh 'docker compose down -v' 
+
+                        sh 'docker rm -f node_exporter_c || true'
+                        sh 'docker rm -f prometheus_c || true'
+                        sh 'docker rm -f grafana_c || true'
+                        sh 'docker rm -f pettrack_nginx_c || true'
+                        sh 'docker rm -f nginx_exporter_c || true'
+
+                    }
+                }
             }
-        }
         
         stage('Deploy with Docker Compose') {
             steps {
