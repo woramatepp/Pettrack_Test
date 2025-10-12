@@ -51,8 +51,8 @@ pipeline {
                     sh 'docker push $PET_IMAGE'
                     echo "Pushing User image..."
                     sh 'docker push $USER_IMAGE'
-                    echo "Pushing Frontend image..."
-                    sh 'docker push $FRONTEND_IMAGE'
+                    // echo "Pushing Frontend image..."
+                    // sh 'docker push $FRONTEND_IMAGE'
                 }
             }
         }
