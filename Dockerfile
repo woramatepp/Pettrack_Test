@@ -3,10 +3,10 @@ FROM node:18 AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
-COPY index.html ./ 
-COPY src ./src
-COPY public ./public
-COPY vite.config.js ./
+COPY index.html .
+COPY src .
+COPY public .
+COPY vite.config.js .
 RUN npm run build
 
 # Stage 2: Serve
