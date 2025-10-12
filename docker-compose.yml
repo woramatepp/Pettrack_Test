@@ -12,7 +12,7 @@ services:
     ports:
       - "8093:5000"
   frontend:
-    build: ./frontend
+    build: .
     ports:
       - "8090:80"
     depends_on:
