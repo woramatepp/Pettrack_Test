@@ -32,7 +32,7 @@ pipeline {
                     echo "Building User service image..."
                     sh 'docker build -t $USER_IMAGE .'
                 }
-                dir('./frontend') {
+                dir('.') {
                     echo "Building Frontend image..."
                     sh 'docker build -t $FRONTEND_IMAGE .'
                 }
