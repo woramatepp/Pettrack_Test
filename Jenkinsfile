@@ -41,7 +41,16 @@ pipeline {
         stage('Deploy with Docker Compose') {
             steps {
                 dir('.') {
-                    sh 'docker compose down'
+                    // ลบ container ที่ครอบ port 8090 ก่อน
+                    sh '''
+                    OLD_CONTAINERS=$(docker ps -q --filter "publish=8090")
+                    if [ ! -z "$OLD_CONTAINERS" ]; then
+                        echo "Removing containers using port 8090: $OLD_CONTAINERS"
+                        docker rm -f $OLD_CONTAINERS
+                    fi
+                    '''
+
+                    sh 'docker compose down --remove-orphans'
                     sh 'docker compose up -d --build'
                 }
             }
