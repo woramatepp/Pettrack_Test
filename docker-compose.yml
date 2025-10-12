@@ -1,0 +1,17 @@
+services:
+  location:
+    build: ./location-service
+    ports:
+      - "8091:5000"
+  pet:
+    build: ./pet-service
+    ports:
+      - "8092:5000"
+  user:
+    build: ./user-service
+    ports:
+      - "8093:5000"
+  frontend:
+    build: .
+    ports:
+      - "8090:80"
