@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Start Jenkins') {
             steps {
-                echo "Starting Jenkins Pipeline..."
+                echo "🚀 Starting Jenkins Pipeline..."
                 echo "Using DockerHub user: $DOCKER_CREDENTIALS_USR"
             }
         }
@@ -22,10 +22,10 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $LOCATION_IMAGE ./location-service
-                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $PET_IMAGE ./pet-service
-                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $USER_IMAGE ./user-service
-                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $FRONTEND_IMAGE .
+                        echo "$SUDO_PASSWORD" | sudo -S docker build -t $LOCATION_IMAGE ./location-service
+                        echo "$SUDO_PASSWORD" | sudo -S docker build -t $PET_IMAGE ./pet-service
+                        echo "$SUDO_PASSWORD" | sudo -S docker build -t $USER_IMAGE ./user-service
+                        echo "$SUDO_PASSWORD" | sudo -S docker build -t $FRONTEND_IMAGE .
                     '''
                 }
             }
@@ -35,12 +35,12 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    echo "$DOCKER_CREDENTIALS_PSW" | docker login -u "$DOCKER_CREDENTIALS_USR" --password-stdin
-                    docker push $LOCATION_IMAGE
-                    docker push $PET_IMAGE
-                    docker push $USER_IMAGE
-                    docker push $FRONTEND_IMAGE
-                    docker logout
+                        echo "$DOCKER_CREDENTIALS_PSW" | docker login -u "$DOCKER_CREDENTIALS_USR" --password-stdin
+                        docker push $LOCATION_IMAGE
+                        docker push $PET_IMAGE
+                        docker push $USER_IMAGE
+                        docker push $FRONTEND_IMAGE
+                        docker logout
                     '''
                 }
             }
@@ -50,7 +50,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker ps -a -q --filter "name=pettrack-" | xargs -r sudo docker rm -f
+                        echo "$SUDO_PASSWORD" | sudo -S docker ps -a -q --filter "name=pettrack-" | xargs -r sudo docker rm -f
                     '''
                 }
             }
@@ -60,9 +60,9 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker network rm express-network || true
-                    echo "$SUDO_PASSWORD" | sudo -S docker compose down --remove-orphans
-                    echo "$SUDO_PASSWORD" | sudo -S docker compose up -d --build
+                        echo "$SUDO_PASSWORD" | sudo -S docker network rm express-network || true
+                        echo "$SUDO_PASSWORD" | sudo -S docker compose down --remove-orphans
+                        echo "$SUDO_PASSWORD" | sudo -S docker compose up -d --build
                     '''
                 }
             }
@@ -72,8 +72,8 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker container prune -f
-                    echo "$SUDO_PASSWORD" | sudo -S docker image prune -f
+                        echo "$SUDO_PASSWORD" | sudo -S docker container prune -f
+                        echo "$SUDO_PASSWORD" | sudo -S docker image prune -f
                     '''
                 }
             }
@@ -82,11 +82,11 @@ pipeline {
 
     post {
         always {
-            echo "Cleaning up after build..."
+            echo "🧹 Cleaning up after build..."
             node {
                 script {
                     sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker logout || true
+                        echo "$SUDO_PASSWORD" | sudo -S docker logout || true
                     '''
                 }
             }
