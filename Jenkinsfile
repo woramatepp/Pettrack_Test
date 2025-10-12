@@ -50,14 +50,19 @@ pipeline {
         stage('Deploy with Docker Compose') {
             steps {
                 dir('.') {
+                    echo "--- FORCE CLEANUP BEFORE DEPLOY ---"
 
-                    sh 'docker network rm pettrack_test_express-network || true'
+                    sh 'docker rm -f pettrack_node_exporter || true'
+                    sh 'docker rm -f pettrack_nginx_exporter || true'
+                    sh 'docker rm -f pettrack_prometheus || true'
+                    sh 'docker rm -f pettrack_grafana || true'
 
-                    sh 'docker rm -f pettrack_node_exporter pettrack_nginx_exporter pettrack_prometheus pettrack_grafana || true'
+                    sh 'docker compose down -v --remove-orphans || true' 
         
-                    sh 'docker compose down --remove-orphans'
-        
+                    echo "--- STARTING FRESH DEPLOY ---"
+ฃ
                     sh 'docker compose up -d' 
+ฃ
                 }
             }
         }
