@@ -73,11 +73,11 @@ pipeline {
     post {
         always {
             echo "🧹 Cleaning up after build..."
-            steps {
+            
                 sh '''
                     echo "$SUDO_PASSWORD" | sudo -S docker logout || true
                 '''
-            }
+            
         }
     }
 }
