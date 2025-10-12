@@ -1,11 +1,13 @@
-# Stage 1: Build
+# Stage 1: Build frontend
 FROM node:18 AS build
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm install
+
 COPY index.html .
-COPY src .
-COPY public .
+COPY src ./src
+COPY public ./public
 COPY vite.config.js .
 RUN npm run build
 
