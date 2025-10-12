@@ -6,7 +6,7 @@ pipeline {
         LOCATION_IMAGE = 'it66070178/location:latest'
         PET_IMAGE      = 'it66070178/pet:latest'
         USER_IMAGE     = 'it66070178/user:latest'
-        // FRONTEND_IMAGE = 'it66070178/frontend:latest'
+        FRONTEND_IMAGE = 'it66070178/frontend:latest'
         DOCKER_CREDENTIALS = credentials('dockerhub')
     }
 
@@ -32,10 +32,10 @@ pipeline {
                     echo "Building User service image..."
                     sh 'docker build -t $USER_IMAGE .'
                 }
-                // dir('.') {
-                //     echo "Building Frontend image..."
-                //     sh 'docker build -t $FRONTEND_IMAGE .'
-                // }
+                dir('.') {
+                    echo "Building Frontend image..."
+                    sh 'docker build -t $FRONTEND_IMAGE .'
+                }
             }
         }
 
@@ -51,8 +51,8 @@ pipeline {
                     sh 'docker push $PET_IMAGE'
                     echo "Pushing User image..."
                     sh 'docker push $USER_IMAGE'
-                    // echo "Pushing Frontend image..."
-                    // sh 'docker push $FRONTEND_IMAGE'
+                    echo "Pushing Frontend image..."
+                    sh 'docker push $FRONTEND_IMAGE'
                 }
             }
         }
