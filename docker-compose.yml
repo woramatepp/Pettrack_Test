@@ -59,6 +59,48 @@ services:
       - location1
       - location2
 
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: pettrack_nginx_exporter
+    environment:
+      - NGINX_SCRAPE_URI=http://nginx:80/nginx_status
+    networks:
+      - express-network
+    depends_on:
+      - nginx 
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: pettrack_prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - express-network
+    depends_on:
+      - nginx_exporter 
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: pettrack_grafana
+    user: "472"
+    ports:
+      - "3000:3000"
+    networks:
+      - express-network
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=strong_secure_password
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+
 networks:
   express-network:
     driver: bridge
+
+volumes:
+  grafana-storage:
