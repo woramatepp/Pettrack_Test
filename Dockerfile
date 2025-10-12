@@ -1,5 +1,5 @@
 # Stage 1: Build frontend
-FROM node:18 AS build
+FROM node:20.19 AS build
 WORKDIR /app
 
 COPY package*.json ./
