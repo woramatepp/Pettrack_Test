@@ -2,12 +2,13 @@ import os
 import psycopg2
 from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
+import ngrok # Import ngrok
 
 # --- Setup ---
 app = Flask(__name__)
 CORS(app)
 
-#DATABASE_URL = "postgresql://`user`:`password`@localhost:5432/pettrack" # 👈 แก้ไขตรงนี้
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://user:password@localhost:5432/pettrack") # ดึงจาก ENV
 
 # --- Routes ---
 @app.route('/')
@@ -32,7 +33,6 @@ def get_latest_location():
 
 @app.route('/log_location', methods=['POST'])
 def log_location():
-    """รับข้อมูลและบันทึกลง PostgreSQL"""
     conn = None
     try:
         data = request.get_json()
@@ -63,4 +63,17 @@ def log_location():
 
 # --- Run Application ---
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    try:
+        if os.environ.get("NGROK_AUTHTOKEN"):
+            listener = ngrok.forward("localhost:5000", authtoken_from_env=True)
+            print("-" * 50)
+            print(f"*** NGROK TUNNEL ESTABLISHED ***")
+            print(f"Public URL: {listener.url()}")
+            print("-" * 50)
+        else:
+            print("⚠️ NGROK_AUTHTOKEN not set. Running locally only.")
+            
+        app.run(host='0.0.0.0', port=5000, debug=True)
+
+    except Exception as e:
+        print(f"❌ NGROK/FLASK STARTUP ERROR: {e}")
