@@ -69,18 +69,17 @@ pipeline {
             }
         }
 
-        stage('Clean Docker') {
+        stage('Clear Docker Components') {
             steps {
                 script {
-                    echo "Cleaning unused Docker containers..."
-                    // ลบเฉพาะ stopped containers
-                    sh 'docker container prune -f'
-                    // ลบเฉพาะ dangling images
-                    sh 'docker image prune -f'
+                    // Remove Docker images and containers
+                    sh 'docker stop $(docker ps -a -q) || true'  
+                    sh  'docker rm $(docker ps -a -q) || true' 
+                    sh  'docker rmi $(docker images -q) || true'
+                    sh 'docker system prune -af'
                 }
             }
         }
-    }
 
     post {
         always {
