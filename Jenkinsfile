@@ -7,7 +7,6 @@ pipeline {
         USER_IMAGE     = 'it66070178/user:latest'
         FRONTEND_IMAGE = 'it66070178/frontend:latest'
         DOCKER_CREDENTIALS = credentials('dockerhub')
-        STACK_NAME = 'pettrack'
     }
 
     stages {
@@ -39,22 +38,26 @@ pipeline {
             }
         }
 
-        stage('Init Docker Swarm') {
+        stage('Clean Old Containers') {
             steps {
-                script {
-
-                    sh 'docker info | grep "Swarm: active" || docker swarm init'
-                }
+                sh '''
+                echo "Stopping and removing old pettrack containers..."
+                docker ps -a -q --filter "name=pettrack-" | xargs -r docker rm -f
+                '''
             }
         }
 
-        stage('Deploy with Docker Swarm Stack') {
+        stage('Deploy with Docker Compose') {
             steps {
                 dir('.') {
+                    // ลบ network ถ้ามีแล้ว
+                    sh 'docker network rm express-network || true'
 
-                    sh 'docker stack rm $STACK_NAME || true'
+                    // ลบ compose orphan containers
+                    sh 'docker compose down --remove-orphans'
 
-                    sh 'docker stack deploy -c docker-compose.yml $STACK_NAME'
+                    // สร้าง container ใหม่
+                    sh 'docker compose up -d --build'
                 }
             }
         }
