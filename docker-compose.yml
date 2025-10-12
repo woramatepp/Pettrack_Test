@@ -3,11 +3,8 @@ version: '3.9'
 services:
   frontend:
     image: it66070178/frontend:latest
-    # ใช้ dynamic port mapping เพื่อให้หลาย container ไม่ชนกัน
-    ports:
-      - "8090-8095:80"
     deploy:
-      replicas: 1
+      replicas: 2
       restart_policy:
         condition: on-failure
     networks:
