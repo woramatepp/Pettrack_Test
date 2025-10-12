@@ -5,11 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-COPY index.html .
-COPY src ./src
-COPY public ./public
-COPY vite.config.js .
-RUN npm run build
+COPY  . .
 
 # Stage 2: Serve
 FROM nginx:alpine
