@@ -42,7 +42,7 @@ pipeline {
             stage('Clean Up and Stop Old Containers') {
                 steps {
                     script {
-                        // 1. ลองหยุดและลบ Container ด้วย docker compose (รวม volume ด้วย)
+                        
                         sh 'docker compose down -v' 
 
                         sh 'docker rm -f node_exporter_c || true'
@@ -54,6 +54,7 @@ pipeline {
                     }
                 }
             }
+        }
         
         stage('Deploy with Docker Compose') {
             steps {
