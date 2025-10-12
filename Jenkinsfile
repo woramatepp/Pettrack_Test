@@ -72,8 +72,11 @@ pipeline {
         stage('Clean Docker') {
             steps {
                 script {
-                    echo "Cleaning unused Docker resources..."
-                    sh 'docker system prune -af'
+                    echo "Cleaning unused Docker containers..."
+                    // ลบเฉพาะ stopped containers
+                    sh 'docker container prune -f'
+                    // ลบเฉพาะ dangling images
+                    sh 'docker image prune -f'
                 }
             }
         }
