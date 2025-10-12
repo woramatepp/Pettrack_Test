@@ -2,15 +2,31 @@ import os
 import psycopg2
 from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
-import ngrok # Import ngrok
+from pyngrok import ngrok
+import logging
 
-# --- Setup ---
+gunicorn_logger = logging.getLogger('gunicorn.error')
+
 app = Flask(__name__)
 CORS(app)
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://user:password@localhost:5432/pettrack") # ดึงจาก ENV
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://user:password@localhost:5432/pettrack")
 
-# --- Routes ---
+# NGROK SETUP
+try:
+    if os.environ.get("NGROK_AUTHTOKEN"):
+        listener = ngrok.connect(5000, authtoken_from_env=True)
+        
+        gunicorn_logger.warning("-" * 50)
+        gunicorn_logger.warning("*** NGROK TUNNEL ESTABLISHED ***")
+        gunicorn_logger.warning(f"Public URL: {listener.public_url}")
+        gunicorn_logger.warning("-" * 50)
+    else:
+        gunicorn_logger.warning("NGROK_AUTHTOKEN not set. Running locally only.")
+        
+except Exception as e:
+    gunicorn_logger.error(f"NGROK STARTUP ERROR: {e}")
+
 @app.route('/')
 def index():
     try:
@@ -55,25 +71,8 @@ def log_location():
         return jsonify({"status": "success", "message": "Location logged successfully"})
 
     except Exception as e:
-        print(f"❌ SERVER ERROR: {e}") 
+        print(f"❌ SERVER ERROR: {e}")
         return jsonify({"status": "error", "message": "An internal server error occurred."}), 500
     finally:
         if conn is not None:
             conn.close()
-
-# --- Run Application ---
-if __name__ == '__main__':
-    try:
-        if os.environ.get("NGROK_AUTHTOKEN"):
-            listener = ngrok.forward("localhost:5000", authtoken_from_env=True)
-            print("-" * 50)
-            print(f"*** NGROK TUNNEL ESTABLISHED ***")
-            print(f"Public URL: {listener.url()}")
-            print("-" * 50)
-        else:
-            print("⚠️ NGROK_AUTHTOKEN not set. Running locally only.")
-            
-        app.run(host='0.0.0.0', port=5000, debug=True)
-
-    except Exception as e:
-        print(f"❌ NGROK/FLASK STARTUP ERROR: {e}")
