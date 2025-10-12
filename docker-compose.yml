@@ -11,4 +11,11 @@ services:
     build: ./user-service
     ports:
       - "8093:5000"
-
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"   # ถ้า frontend ใช้ nginx serve build แล้ว
+    depends_on:
+      - location
+      - pet
+      - user
