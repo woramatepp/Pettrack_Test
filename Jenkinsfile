@@ -7,6 +7,7 @@ pipeline {
         USER_IMAGE     = 'it66070178/user:latest'
         FRONTEND_IMAGE = 'it66070178/frontend:latest'
         DOCKER_CREDENTIALS = credentials('dockerhub')
+        COMPOSE_FILE = '/home/poomworamet2004/Pettrack_Test/docker-compose.yml'
     }
 
     stages {
@@ -40,24 +41,16 @@ pipeline {
 
         stage('Clean Old Containers') {
             steps {
-                sh '''
-                echo "Stopping and removing old pettrack containers..."
-                docker ps -a -q --filter "name=pettrack-" | xargs -r docker rm -f
-                '''
+                sh 'docker ps -a -q --filter "name=pettrack-" | xargs -r docker rm -f'
             }
         }
 
         stage('Deploy with Docker Compose') {
             steps {
-                dir('.') {
-                    // ลบ network ถ้ามีแล้ว
-                    sh 'docker network rm express-network || true'
-
-                    // ลบ compose orphan containers
-                    sh 'docker compose down --remove-orphans'
-
-                    // สร้าง container ใหม่
-                    sh 'docker compose up -d --build'
+                script {
+                    sh "docker network rm express-network || true"
+                    sh "docker compose -f $COMPOSE_FILE down --remove-orphans"
+                    sh "docker compose -f $COMPOSE_FILE up -d --build"
                 }
             }
         }
