@@ -10,4 +10,6 @@ COPY . .
 
 EXPOSE 5000
 
+COPY location-service/ .
+
 CMD ["python", "app.py"]
