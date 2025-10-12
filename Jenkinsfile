@@ -60,9 +60,9 @@ pipeline {
                     sh 'docker compose down -v --remove-orphans || true' 
         
                     echo "--- STARTING FRESH DEPLOY ---"
-ฃ
+
                     sh 'docker compose up -d' 
-ฃ
+
                 }
             }
         }
