@@ -38,25 +38,29 @@ pipeline {
             }
         }
 
+        stage('Clean Old Containers') {
+            steps {
+                // ลบ container ที่ชื่อขึ้นต้นด้วย pettrack- ถ้ายังมีอยู่
+                sh '''
+                echo "Stopping and removing old pettrack containers..."
+                docker ps -a -q --filter "name=pettrack-" | xargs -r docker rm -f
+                '''
+            }
+        }
+
         stage('Deploy with Docker Compose') {
             steps {
                 dir('.') {
-                    // ลบ container ที่ครอบ port 8090 ก่อน
-                    sh '''
-                    OLD_CONTAINERS=$(docker ps -q --filter "publish=8090")
-                    if [ ! -z "$OLD_CONTAINERS" ]; then
-                        echo "Removing containers using port 8090: $OLD_CONTAINERS"
-                        docker rm -f $OLD_CONTAINERS
-                    fi
-                    '''
-
+                    // ลบ compose network หรือ orphan container
                     sh 'docker compose down --remove-orphans'
+
+                    // สร้าง container ใหม่
                     sh 'docker compose up -d --build'
                 }
             }
         }
 
-        stage('Clean Docker') {
+        stage('Clean Docker System') {
             steps {
                 sh 'docker container prune -f'
                 sh 'docker image prune -f'
@@ -65,6 +69,9 @@ pipeline {
     }
 
     post {
-        always { sh 'docker logout' }
+        always {
+            echo "Logging out from Docker..."
+            sh 'docker logout'
+        }
     }
 }
