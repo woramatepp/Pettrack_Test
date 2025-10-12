@@ -1,48 +1,64 @@
 version: '3.9'
 
 services:
-  frontend:
+  frontend1:
     image: it66070178/frontend:latest
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
-      # published port สำหรับ Swarm load balancing
-      ports:
-        - target: 80
-          published: 8090
-          protocol: tcp
-          mode: host
     networks:
       - express-network
 
-  user:
+  frontend2:
+    image: it66070178/frontend:latest
+    networks:
+      - express-network
+
+  user1:
     image: it66070178/user:latest
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
     networks:
       - express-network
 
-  pet:
+  user2:
+    image: it66070178/user:latest
+    networks:
+      - express-network
+
+  pet1:
     image: it66070178/pet:latest
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
     networks:
       - express-network
 
-  location:
-    image: it66070178/location:latest
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
+  pet2:
+    image: it66070178/pet:latest
     networks:
       - express-network
+
+  location1:
+    image: it66070178/location:latest
+    networks:
+      - express-network
+
+  location2:
+    image: it66070178/location:latest
+    networks:
+      - express-network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8090:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - express-network
+    depends_on:
+      - frontend1
+      - frontend2
+      - user1
+      - user2
+      - pet1
+      - pet2
+      - location1
+      - location2
 
 networks:
   express-network:
-    driver: overlay
+    driver: bridge
