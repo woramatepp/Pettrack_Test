@@ -7,22 +7,27 @@ pipeline {
         USER_IMAGE     = 'it66070178/user:latest'
         FRONTEND_IMAGE = 'it66070178/frontend:latest'
         DOCKER_CREDENTIALS = credentials('dockerhub')
-        SUDO_PASSWORD = credentials('jenkins-sudo')  // ต้องสร้าง credentials เพิ่มใน Jenkins
+        SUDO_PASSWORD = credentials('jenkins-sudo')
     }
 
     stages {
         stage('Start Jenkins') {
             steps {
                 echo "Starting Jenkins Pipeline..."
+                echo "Using DockerHub user: $DOCKER_CREDENTIALS_USR"
             }
         }
 
         stage('Build Docker Images') {
             steps {
-                dir('./location-service') { sh 'echo $SUDO_PASSWORD | sudo -S docker build -t $LOCATION_IMAGE .' }
-                dir('./pet-service') { sh 'echo $SUDO_PASSWORD | sudo -S docker build -t $PET_IMAGE .' }
-                dir('./user-service') { sh 'echo $SUDO_PASSWORD | sudo -S docker build -t $USER_IMAGE .' }
-                dir('.') { sh 'echo $SUDO_PASSWORD | sudo -S docker build -t $FRONTEND_IMAGE .' }
+                script {
+                    sh '''
+                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $LOCATION_IMAGE ./location-service
+                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $PET_IMAGE ./pet-service
+                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $USER_IMAGE ./user-service
+                    echo "$SUDO_PASSWORD" | sudo -S docker build -t $FRONTEND_IMAGE .
+                    '''
+                }
             }
         }
 
@@ -30,13 +35,12 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    echo $SUDO_PASSWORD | sudo -S bash -c "
-                        echo $DOCKER_CREDENTIALS_PSW | docker login --username $DOCKER_CREDENTIALS_USR --password-stdin &&
-                        docker push $LOCATION_IMAGE &&
-                        docker push $PET_IMAGE &&
-                        docker push $USER_IMAGE &&
-                        docker push $FRONTEND_IMAGE
-                    "
+                    echo "$DOCKER_CREDENTIALS_PSW" | docker login -u "$DOCKER_CREDENTIALS_USR" --password-stdin
+                    docker push $LOCATION_IMAGE
+                    docker push $PET_IMAGE
+                    docker push $USER_IMAGE
+                    docker push $FRONTEND_IMAGE
+                    docker logout
                     '''
                 }
             }
@@ -44,36 +48,46 @@ pipeline {
 
         stage('Clean Old Containers') {
             steps {
-                sh '''
-                echo $SUDO_PASSWORD | sudo -S bash -c "
-                    docker ps -a -q --filter name=pettrack- | xargs -r docker rm -f
-                "
-                '''
+                script {
+                    sh '''
+                    echo "$SUDO_PASSWORD" | sudo -S docker ps -a -q --filter "name=pettrack-" | xargs -r sudo docker rm -f
+                    '''
+                }
             }
         }
 
         stage('Deploy with Docker Compose') {
             steps {
-                sh '''
-                echo $SUDO_PASSWORD | sudo -S bash -c "
-                    docker network rm express-network || true
-                    docker compose down --remove-orphans
-                    docker compose up -d --build
-                "
-                '''
+                script {
+                    sh '''
+                    echo "$SUDO_PASSWORD" | sudo -S docker network rm express-network || true
+                    echo "$SUDO_PASSWORD" | sudo -S docker compose down --remove-orphans
+                    echo "$SUDO_PASSWORD" | sudo -S docker compose up -d --build
+                    '''
+                }
             }
         }
 
         stage('Clean Docker System') {
             steps {
-                sh 'echo $SUDO_PASSWORD | sudo -S docker system prune -f'
+                script {
+                    sh '''
+                    echo "$SUDO_PASSWORD" | sudo -S docker container prune -f
+                    echo "$SUDO_PASSWORD" | sudo -S docker image prune -f
+                    '''
+                }
             }
         }
     }
 
     post {
         always {
-            sh 'echo $SUDO_PASSWORD | sudo -S docker logout'
+            echo "Cleaning up after build..."
+            script {
+                sh '''
+                echo "$SUDO_PASSWORD" | sudo -S docker logout || true
+                '''
+            }
         }
     }
 }
