@@ -46,18 +46,18 @@ pipeline {
                 '''
             }
         }
-
+        
         stage('Deploy with Docker Compose') {
             steps {
                 dir('.') {
-                    // ลบ network ถ้ามีแล้ว
-                    sh 'docker network rm express-network || true'
 
-                    // ลบ compose orphan containers
+                    sh 'docker network rm pettrack_test_express-network || true'
+
+                    sh 'docker rm -f pettrack_node_exporter pettrack_nginx_exporter pettrack_prometheus pettrack_grafana || true'
+        
                     sh 'docker compose down --remove-orphans'
-
-                    // สร้าง container ใหม่
-                    sh 'docker compose up -d --build'
+        
+                    sh 'docker compose up -d' 
                 }
             }
         }
