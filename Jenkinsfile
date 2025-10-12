@@ -21,7 +21,7 @@ pipeline {
             steps {
                 dir('./location-service') { sh 'docker build -t $LOCATION_IMAGE .' }
                 dir('./pet-service') { sh 'docker build -t $PET_IMAGE .' }
-                dir('./user-service') { sh 'docker build -t $USER_IMAGE .' }
+                dir('./user-service') { sh 'docker build -t $USER_IMAGE . --no-cache' }
                 dir('.') { sh 'docker build -t $FRONTEND_IMAGE .' }
             }
         }
