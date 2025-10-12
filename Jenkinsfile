@@ -48,9 +48,9 @@ pipeline {
         stage('Deploy with Docker Compose') {
             steps {
                 script {
-                    sh "docker network rm express-network || true"
-                    sh "docker compose -f $COMPOSE_FILE down --remove-orphans"
-                    sh "docker compose -f $COMPOSE_FILE up -d --build"
+                    sh 'docker network rm express-network || true'
+                    sh 'docker compose --env-file /dev/null down --remove-orphans'
+                    sh 'docker compose --env-file /dev/null up -d --build'
                 }
             }
         }
