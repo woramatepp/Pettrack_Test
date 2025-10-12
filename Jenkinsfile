@@ -83,10 +83,12 @@ pipeline {
     post {
         always {
             echo "Cleaning up after build..."
-            script {
-                sh '''
-                echo "$SUDO_PASSWORD" | sudo -S docker logout || true
-                '''
+            node {
+                script {
+                    sh '''
+                    echo "$SUDO_PASSWORD" | sudo -S docker logout || true
+                    '''
+                }
             }
         }
     }
