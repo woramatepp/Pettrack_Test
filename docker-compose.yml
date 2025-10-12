@@ -3,28 +3,31 @@ version: '3.9'
 services:
   frontend:
     image: it66070178/frontend:latest
+    # ใช้ dynamic port mapping เพื่อให้หลาย container ไม่ชนกัน
     ports:
-      - "8090:80"
+      - "8090-8095:80"
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
-
-  location:
-    image: it66070178/location:latest
-    deploy:
-      replicas: 2
-
-  pet:
-    image: it66070178/pet:latest
-    deploy:
-      replicas: 2
+    networks:
+      - express-network
 
   user:
     image: it66070178/user:latest
-    deploy:
-      replicas: 2
+    networks:
+      - express-network
+
+  pet:
+    image: it66070178/pet:latest
+    networks:
+      - express-network
+
+  location:
+    image: it66070178/location:latest
+    networks:
+      - express-network
 
 networks:
-  default:
-    name: express-network
+  express-network:
+    driver: bridge
