@@ -82,6 +82,7 @@ services:
       - express-network
     depends_on:
       - nginx_exporter 
+      - node_exporter
 
   grafana:
     image: grafana/grafana:latest
@@ -97,6 +98,14 @@ services:
       - grafana-storage:/var/lib/grafana
     depends_on:
       - prometheus
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: pettrack_node_exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - express-network
 
 networks:
   express-network:
