@@ -14,7 +14,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "8080:80"   # ถ้า frontend ใช้ nginx serve build แล้ว
+      - "8090:80"
     depends_on:
       - location
       - pet
