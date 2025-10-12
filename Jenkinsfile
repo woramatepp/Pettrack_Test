@@ -37,7 +37,7 @@ pipeline {
                     docker push $PET_IMAGE
                     docker push $USER_IMAGE
                     docker push $FRONTEND_IMAGE
-                    docker logout
+                    docker logout || true
                 '''
             }
         }
@@ -45,7 +45,7 @@ pipeline {
         stage('Clean Old Containers') {
             steps {
                 sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker ps -a -q --filter "name=pettrack-" | xargs -r sudo docker rm -f
+                    echo "$SUDO_PASSWORD" | sudo -S docker ps -a -q --filter "name=pettrack-" | xargs -r sudo docker rm -f || true
                 '''
             }
         }
@@ -54,7 +54,7 @@ pipeline {
             steps {
                 sh '''
                     echo "$SUDO_PASSWORD" | sudo -S docker network rm express-network || true
-                    echo "$SUDO_PASSWORD" | sudo -S docker compose down --remove-orphans
+                    echo "$SUDO_PASSWORD" | sudo -S docker compose down --remove-orphans || true
                     echo "$SUDO_PASSWORD" | sudo -S docker compose up -d --build
                 '''
             }
@@ -63,19 +63,19 @@ pipeline {
         stage('Clean Docker System') {
             steps {
                 sh '''
-                    echo "$SUDO_PASSWORD" | sudo -S docker container prune -f
-                    echo "$SUDO_PASSWORD" | sudo -S docker image prune -f
+                    echo "$SUDO_PASSWORD" | sudo -S docker container prune -f || true
+                    echo "$SUDO_PASSWORD" | sudo -S docker image prune -f || true
                 '''
             }
         }
-    }
 
- post {
-        always {
-            echo "🧹 Cleaning up after build..."
-            sh '''
-                echo "$SUDO_PASSWORD" | sudo -S docker logout || true
-            '''
+        stage('Final Cleanup') {
+            steps {
+                echo "🧹 Final cleanup after build..."
+                sh '''
+                    echo "$SUDO_PASSWORD" | sudo -S docker logout || true
+                '''
+            }
         }
     }
 }
