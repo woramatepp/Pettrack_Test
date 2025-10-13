@@ -1,6 +1,20 @@
 version: '3.9'
 
 services:
+
+  postgres_c:
+    image: postgres:latest
+    container_name: postgres_c
+    environment:
+      POSTGRES_DB: pettrack
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - petnet
+
+
   frontend1:
     image: it66070178/frontend:latest
     networks:
@@ -15,31 +29,47 @@ services:
     image: it66070178/user:latest
     networks:
       - petnet
+    depends_on:
+      - postgres_c
 
   user2:
     image: it66070178/user:latest
     networks:
       - petnet
+    depends_on:
+      - postgres_c
 
   pet1:
     image: it66070178/pet:latest
     networks:
       - petnet
+    depends_on:
+      - postgres_c
 
   pet2:
     image: it66070178/pet:latest
     networks:
       - petnet
+    depends_on:
+      - postgres_c
 
   location1:
     image: it66070178/location:latest
+    environment:
+      DATABASE_URL: "postgresql://user:password@postgres_c:5432/pettrack"
     networks:
       - petnet
+    depends_on:
+      - postgres_c
 
   location2:
     image: it66070178/location:latest
+    environment:
+      DATABASE_URL: "postgresql://user:password@postgres_c:5432/pettrack"
     networks:
       - petnet
+    depends_on:
+      - postgres_c
 
   nginx:
     image: nginx:latest
@@ -86,7 +116,7 @@ services:
       - node_exporter
 
   grafana:
-    image: grafana/grafana:10.4.4-ubuntu 
+    image: grafana/grafana:10.4.4-ubuntu
     container_name: grafana_c
     user: "472"
     ports:
@@ -114,3 +144,4 @@ networks:
 
 volumes:
   grafana-storage:
+  postgres_data: 
