@@ -41,6 +41,23 @@ services:
     networks:
       - petnet
 
+  ngrok-tunnel:
+    image: wernight/ngrok 
+    container_name: ngrok_tunnel_c
+    ports:
+      - "4040:4040"
+    networks:
+      - petnet
+    environment:
+
+      NGROK_TOKEN: ${NGROK_AUTHTOKEN}
+      
+      TUNNEL_PORT: "location1:5000" 
+
+      PROTOCOL: http
+    depends_on:
+      - location1 
+
   nginx:
     image: nginx:latest
     container_name: pettrack_nginx_c
