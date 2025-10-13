@@ -1,149 +1,116 @@
 version: '3.9'
 
 services:
+  frontend1:
+    image: it66070178/frontend:latest
+    networks:
+      - petnet
 
-  postgres_c:
-    image: postgres:latest
-    container_name: postgres_c
-    environment:
-      POSTGRES_DB: pettrack
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - petnet
+  frontend2:
+    image: it66070178/frontend:latest
+    networks:
+      - petnet
 
+  user1:
+    image: it66070178/user:latest
+    networks:
+      - petnet
 
-  frontend1:
-    image: it66070178/frontend:latest
-    networks:
-      - petnet
+  user2:
+    image: it66070178/user:latest
+    networks:
+      - petnet
 
-  frontend2:
-    image: it66070178/frontend:latest
-    networks:
-      - petnet
+  pet1:
+    image: it66070178/pet:latest
+    networks:
+      - petnet
 
-  user1:
-    image: it66070178/user:latest
-    networks:
-      - petnet
-    depends_on:
-      - postgres_c
+  pet2:
+    image: it66070178/pet:latest
+    networks:
+      - petnet
 
-  user2:
-    image: it66070178/user:latest
-    networks:
-      - petnet
-    depends_on:
-      - postgres_c
+  location1:
+    image: it66070178/location:latest
+    networks:
+      - petnet
 
-  pet1:
-    image: it66070178/pet:latest
-    networks:
-      - petnet
-    depends_on:
-      - postgres_c
+  location2:
+    image: it66070178/location:latest
+    networks:
+      - petnet
 
-  pet2:
-    image: it66070178/pet:latest
-    networks:
-      - petnet
-    depends_on:
-      - postgres_c
+  nginx:
+    image: nginx:latest
+    container_name: pettrack_nginx_c
+    ports:
+      - "8091:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - petnet
+    depends_on:
+      - frontend1
+      - frontend2
+      - user1
+      - user2
+      - pet1
+      - pet2
+      - location1
+      - location2
 
-  location1:
-    image: it66070178/location:latest
-    environment:
-      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N" 
-      DATABASE_URL: "postgresql://user:password@postgres_c:5432/pettrack"
-    networks:
-      - petnet
-    depends_on:
-      - postgres_c
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx_exporter_c
+    environment:
+      - NGINX_SCRAPE_URI=http://nginx:80/nginx_status
+    networks:
+      - petnet
+    depends_on:
+      - nginx
 
-  location2:
-    image: it66070178/location:latest
-    environment:
-      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N" 
-      DATABASE_URL: "postgresql://user:password@postgres_c:5432/pettrack"
-    networks:
-      - petnet
-    depends_on:
-      - postgres_c
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus_c
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - petnet
+    depends_on:
+      - nginx_exporter
+      - node_exporter
 
-  nginx:
-    image: nginx:latest
-    container_name: pettrack_nginx_c
-    ports:
-      - "8091:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    networks:
-      - petnet
-    depends_on:
-      - frontend1
-      - frontend2
-      - user1
-      - user2
-      - pet1
-      - pet2
-      - location1
-      - location2
+  grafana:
+    image: grafana/grafana:10.4.4-ubuntu 
+    container_name: grafana_c
+    user: "472"
+    ports:
+      - "3000:3000"
+    networks:
+      - petnet
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=strong_secure_password
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
 
-  nginx_exporter:
-    image: nginx/nginx-prometheus-exporter:latest
-    container_name: nginx_exporter_c
-    environment:
-      - NGINX_SCRAPE_URI=http://nginx:80/nginx_status
-    networks:
-      - petnet
-    depends_on:
-      - nginx
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus_c
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    ports:
-      - "9090:9090"
-    networks:
-      - petnet
-    depends_on:
-      - nginx_exporter
-      - node_exporter
-
-  grafana:
-    image: grafana/grafana:10.4.4-ubuntu
-    container_name: grafana_c
-    user: "472"
-    ports:
-      - "3000:3000"
-    networks:
-      - petnet
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=strong_secure_password
-    volumes:
-      - grafana-storage:/var/lib/grafana
-    depends_on:
-      - prometheus
-
-  node_exporter:
-    image: prom/node-exporter:latest
-    container_name: node_exporter_c
-    ports:
-      - "9100:9100"
-    networks:
-      - petnet
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter_c
+    ports:
+      - "9100:9100"
+    networks:
+      - petnet
 
 networks:
-  petnet:
-    driver: bridge
+  petnet:
+    driver: bridge
 
 volumes:
-  grafana-storage:
-  postgres_data: 
+  grafana-storage: 
