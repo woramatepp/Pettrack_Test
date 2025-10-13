@@ -16,7 +16,7 @@ def index():
     except FileNotFoundError:
         return "Error: index.html not found.", 404
     
-@app.route('/locations/latest', methods=['GET'])
+@app.route('/latest', methods=['GET'])
 def get_latest_location():
     conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
@@ -29,7 +29,7 @@ def get_latest_location():
     latitude, longitude, timestamp = row
     return {"latitude": latitude, "longitude": longitude, "timestamp": timestamp}
 
-@app.route('/log_location', methods=['POST'])
+@app.route('/log', methods=['POST'])
 def log_location():
     conn = None
     try:
