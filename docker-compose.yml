@@ -33,16 +33,18 @@ services:
     networks:
       - petnet
 
-  location1:
-    image: it66070178/location:latest
-    networks:
-      - petnet
-
-  location2:
-    image: it66070178/location:latest
-    networks:
-      - petnet
-
+location1:
+    image: it66070178/location:latest
+    networks:
+      - petnet
+    environment:
+      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N"
+location1:
+    image: it66070178/location:latest
+    networks:
+      - petnet
+    environment:
+      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N" 
   # -----------------------------------
   # Monitoring Services
   # -----------------------------------
