@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '@/pages/login.vue';
-import SignUp from '@/pages/signUp.vue';
+import SignUp from '@/pages/signup.vue';
 import Overview from '@/pages/overview.vue';
 import MyPet from '@/pages/mypet.vue';
 import PetAdd from '@/pages/petadd.vue';
