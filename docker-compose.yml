@@ -56,6 +56,7 @@ services:
   location1:
     image: it66070178/location:latest
     environment:
+      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N" 
       DATABASE_URL: "postgresql://user:password@postgres_c:5432/pettrack"
     networks:
       - petnet
@@ -65,6 +66,7 @@ services:
   location2:
     image: it66070178/location:latest
     environment:
+      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N" 
       DATABASE_URL: "postgresql://user:password@postgres_c:5432/pettrack"
     networks:
       - petnet
