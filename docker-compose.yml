@@ -1,7 +1,6 @@
 version: '3.9'
 
 services:
-
   frontend1:
     image: it66070178/frontend:latest
     networks:
@@ -32,20 +31,15 @@ services:
     networks:
       - petnet
 
-  location1: 
+  location1:
     image: it66070178/location:latest
     networks:
       - petnet
-    environment:
-      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N"
 
   location2:
     image: it66070178/location:latest
     networks:
       - petnet
-    environment:
-      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N"
-
 
   nginx:
     image: nginx:latest
@@ -66,7 +60,7 @@ services:
       - location1
       - location2
 
-  nginx_exporter: 
+  nginx_exporter:
     image: nginx/nginx-prometheus-exporter:latest
     container_name: nginx_exporter_c
     environment:
@@ -92,7 +86,7 @@ services:
       - node_exporter
 
   grafana:
-    image: grafana/grafana:10.4.4-ubuntu
+    image: grafana/grafana:10.4.4-ubuntu 
     container_name: grafana_c
     user: "472"
     ports:
