@@ -89,7 +89,7 @@ function cancelEdit() {
 
           <div class="p-[3px] bg-gradient-to-tr from-[#FF7F50] to-[#FFD5B2] rounded-full shadow-lg">
             <img class="w-44 h-44 rounded-full border-4 border-white shadow-md object-cover"
-              :src="`http://localhost:3000${pet.image}`" :alt="pet.name" />
+              :src="`/api${pet.image}`" :alt="pet.name" />
           </div>
 
           <div class="mt-3 w-full text-center">

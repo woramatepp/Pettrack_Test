@@ -77,7 +77,7 @@ let updateInterval = null;
 
 async function fetchLatestLocation() {
   try {
-    const res = await fetch("http://localhost:5000/locations/latest");
+    const res = await fetch("/locations/latest");
     if (!res.ok) return;
 
     const loc = await res.json();
@@ -150,7 +150,7 @@ function goToMarker() {
         @click="selectPet(pet)">
         <div class="p-[3px] bg-gradient-to-tr from-[#FF7F50] to-[#FFD5B2] rounded-full">
           <img class="w-44 h-44 rounded-full border-4 border-white shadow-md object-cover"
-            :src="`http://localhost:3000${pet.image}`" :alt="pet.name" />
+            :src="`/api${pet.image}`" :alt="pet.name" />
         </div>
         <p class="mt-3 text-lg font-semibold text-[#B26D38] group-hover:text-[#FF7F50]">{{ pet.name }}</p>
       </div>
@@ -187,7 +187,7 @@ function goToMarker() {
         <!-- Pet Info -->
         <div
           class="bg-[#FFF7E2]/80 p-4 rounded-3xl shadow-lg w-full md:w-1/3 flex flex-col items-center border border-[#E4C9A2]/50">
-          <img :src="`http://localhost:3000${selectedPet.image}`"
+          <img :src="`/api${selectedPet.image}`"
             class="w-52 h-auto rounded-2xl border-4 border-white shadow-md mb-4" />
           <p class="text-2xl font-mono text-[#FF7F50] mb-3 border-b border-[#E4C9A2] pb-1">Pet Info</p>
           <div class="text-[#B26D38] text-lg space-y-1 text-center">

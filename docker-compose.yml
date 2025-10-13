@@ -1,132 +1,97 @@
-version: '3.9'
-
 services:
-  frontend1:
-    image: it66070178/frontend:latest
-    networks:
-      - petnet
-
-  frontend2:
-    image: it66070178/frontend:latest
-    networks:
-      - petnet
-
-  user1:
-    image: it66070178/user:latest
-    networks:
-      - petnet
-
-  user2:
-    image: it66070178/user:latest
-    networks:
-      - petnet
-
-  pet1:
-    image: it66070178/pet:latest
-    networks:
-      - petnet
-
-  pet2:
-    image: it66070178/pet:latest
-    networks:
-      - petnet
-
-  location1:
-    image: it66070178/location:latest
-    ports:
-      - "5000:5000"
-    networks:
-      - petnet
-
-  location2:
-    image: it66070178/location:latest
-    networks:
-      - petnet
-
-  ngrok-tunnel:
-    image: wernight/ngrok
-    container_name: ngrok_tunnel_c
-    ports:
-      - "4040:4040"
-    networks:
-      - petnet
+  postgres:
+    image: postgres:13
+    container_name: postgres_db
     environment:
-      - NGROK_TOKEN=${NGROK_AUTHTOKEN}
-      - TUNNEL_PORT=location1:5000
-      - PROTOCOL=http
-    depends_on:
-      - location1
-
-  nginx:
-    image: nginx:latest
-    container_name: pettrack_nginx_c
-    ports:
-      - "8091:80"
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: pettrack
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    networks:
-      - petnet
-    depends_on:
-      - frontend1
-      - frontend2
-      - user1
-      - user2
-      - pet1
-      - pet2
-      - location1
-      - location2
-
-  nginx_exporter:
-    image: nginx/nginx-prometheus-exporter:latest
-    container_name: nginx_exporter_c
-    environment:
-      - NGINX_SCRAPE_URI=http://nginx:80/nginx_status
-    networks:
-      - petnet
-    depends_on:
-      - nginx
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus_c
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "9090:9090"
-    networks:
-      - petnet
-    depends_on:
-      - nginx_exporter
-      - node_exporter
+      - "5432:5432"
+    restart: always
 
-  grafana:
-    image: grafana/grafana:10.4.4-ubuntu
-    container_name: grafana_c
-    user: "472"
+  user-pet-service:
+    container_name: user_pet_service
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
     ports:
       - "3000:3000"
-    networks:
-      - petnet
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=strong_secure_password
+    env_file:
+      - ./user-service/.env
     volumes:
-      - grafana-storage:/var/lib/grafana
+      - ./user-service/uploads:/app/user-service/uploads
+    depends_on:
+      - postgres
+    restart: always
+
+  location-service:
+    container_name: location_service
+    build:
+      context: ./location-service
+      dockerfile: Dockerfile
+    env_file:
+      - ./location-service/.env
+    depends_on:
+      - postgres
+    restart: always
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok_service
+    restart: always
+    environment:
+      - NGROK_AUTHTOKEN=341Qw6gaogcj89oHBRMsSomD923_41B4RXmcGb4aAiPuHSyH8 # <-- ใส่ Authtoken ของคุณ
+    command: http location-service:5000
+
+  frontend:
+    container_name: frontend_app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - user-pet-service
+      - location-service
+    restart: always
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    restart: always
+
+  # --- เพิ่ม Jenkins Service ---
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    restart: always
+    ports:
+      - "8081:8080"  # เข้า Jenkins ผ่านพอร์ต 8081 (เพราะ 8080 ถูกใช้แล้ว)
+      - "50000:50000" # สำหรับเชื่อมต่อกับ Agent
+    volumes:
+      - jenkins_home:/var/jenkins_home
+
+  # --- เพิ่ม Grafana Service ---
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    restart: always
+    ports:
+      - "3001:3000" # เข้า Grafana ผ่านพอร์ต 3001 (เพราะ 3000 ถูกใช้แล้ว)
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
     depends_on:
       - prometheus
 
-  node_exporter:
-    image: prom/node-exporter:latest
-    container_name: node_exporter_c
-    ports:
-      - "9100:9100"
-    networks:
-      - petnet
-
-networks:
-  petnet:
-    driver: bridge
-
 volumes:
-  grafana-storage:
+  postgres_data:
+  jenkins_home:   # <-- เพิ่ม Volume สำหรับ Jenkins
+  grafana_data:   # <-- เพิ่ม Volume สำหรับ Grafana

@@ -24,7 +24,7 @@ async function fetchProfileData() {
     description.value = data.description || "";
 
     if (data.profile_picture) {
-      userImage.value = `http://localhost:3000/uploads/profile_pics/${data.profile_picture}`;
+      userImage.value = `/api/uploads/profile_pics/${data.profile_picture}`;
     }
   } catch (error) {
     console.error("Failed to fetch profile:", error);

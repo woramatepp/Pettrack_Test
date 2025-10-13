@@ -19,7 +19,7 @@ onMounted(async () => {
     const token = localStorage.getItem("authToken");
     if (!token) return router.push("/login");
 
-    const res = await axios.get("http://localhost:3000/profile", {
+    const res = await axios.get("/api/profile", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -69,7 +69,7 @@ watch(selectedOption, (value) => {
 
       <div class="ml-auto flex items-center gap-2">
         <img
-          :src="user.profile_picture ? `http://localhost:3000/uploads/profile_pics/${user.profile_picture}` : defaultImage"
+          :src="user.profile_picture ? `/api/uploads/profile_pics/${user.profile_picture}` : defaultImage"
           alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200" />
         <select v-model="selectedOption"
           class="text-[#EA580C] text-lg rounded-md transition-all duration-300 hover:text-[#613818] bg-transparent border-none focus:outline-none">

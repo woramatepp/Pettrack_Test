@@ -28,7 +28,7 @@
 
         async function sendLocationToServer(lat, lon) {
             try {
-                const response = await fetch('/log_location', {
+                const response = await fetch('/log', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ lat, lon })

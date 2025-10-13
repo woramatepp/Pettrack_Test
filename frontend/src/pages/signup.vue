@@ -44,7 +44,7 @@ export default {
       };
       console.log("Submitting:", formData);
       try {
-        const res = await api.post("http://user:5002/auth/signup", formData);
+        const res = await api.post("/auth/signup", formData);
         console.log("Registered:", res.data);
         alert("Sign up successful!");
         this.$router.push("/login")

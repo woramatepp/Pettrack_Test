@@ -1,5 +1,5 @@
-Flask==2.3.3
-Flask-Cors==3.0.10
-psycopg2-binary==2.9.9
-gunicorn==20.0.4
-pyngrok==6.1.2
+Flask
+Flask-Cors
+psycopg2-binary
+pyngrok
+gunicorn
