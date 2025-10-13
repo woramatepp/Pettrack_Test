@@ -33,8 +33,8 @@ services:
 
   location1:
     image: it66070178/location:latest
-    ports:          
-      - "5000:5000"
+    ports:
+      - "5000:5000"
     networks:
       - petnet
 
@@ -44,21 +44,18 @@ services:
       - petnet
 
   ngrok-tunnel:
-    image: wernight/ngrok 
+    image: wernight/ngrok
     container_name: ngrok_tunnel_c
     ports:
       - "4040:4040"
     networks:
       - petnet
     environment:
-
-      NGROK_TOKEN: ${NGROK_AUTHTOKEN}
-      
-      TUNNEL_PORT: "location1:5000" 
-
-      PROTOCOL: http
+      - NGROK_TOKEN=${NGROK_AUTHTOKEN}
+      - TUNNEL_PORT=location1:5000
+      - PROTOCOL=http
     depends_on:
-      - location1 
+      - location1
 
   nginx:
     image: nginx:latest
@@ -105,7 +102,7 @@ services:
       - node_exporter
 
   grafana:
-    image: grafana/grafana:10.4.4-ubuntu 
+    image: grafana/grafana:10.4.4-ubuntu
     container_name: grafana_c
     user: "472"
     ports:
