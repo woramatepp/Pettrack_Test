@@ -37,35 +37,32 @@ pipeline {
                 }
             }
         }
-        
-        stage('Clean Up and Stop Old Containers') {
+
+        stage('Clean Old Containers') {
             steps {
-                script {
-                    echo "--- STARTING DEEP CLEAN UP ---"
-                    // ลบ Container ที่มีการกำหนดชื่อเฉพาะเจาะจงใน docker-compose.yml
-                    sh 'docker rm -f node_exporter_c || true'
-                    sh 'docker rm -f prometheus_c || true'
-                    sh 'docker rm -f grafana_c || true'
-                    sh 'docker rm -f pettrack_nginx_c || true'
-                    sh 'docker rm -f nginx_exporter_c || true'
-
-                    // ลบ Container และ Network ทั้งหมดของ Project นี้ (รวม Volume ด้วย)
-                    sh 'docker compose down -v --remove-orphans || true' 
-
-                    // ลบชื่อ Container เก่าๆ ที่อาจจะยังค้างอยู่
-                    sh 'docker rm -f pettrack_node_exporter || true'
-                    sh 'docker rm -f pettrack_nginx_exporter || true'
-                    sh 'docker rm -f pettrack_prometheus || true'
-                    sh 'docker rm -f pettrack_grafana || true'
-                }
+                sh '''
+                echo "Stopping and removing old pettrack containers..."
+                docker ps -a -q --filter "name=pettrack-" | xargs -r docker rm -f
+                '''
             }
         }
         
         stage('Deploy with Docker Compose') {
             steps {
                 dir('.') {
+                    echo "--- FORCE CLEANUP BEFORE DEPLOY ---"
+
+                    sh 'docker rm -f pettrack_node_exporter || true'
+                    sh 'docker rm -f pettrack_nginx_exporter || true'
+                    sh 'docker rm -f pettrack_prometheus || true'
+                    sh 'docker rm -f pettrack_grafana || true'
+
+                    sh 'docker compose down -v --remove-orphans || true' 
+        
                     echo "--- STARTING FRESH DEPLOY ---"
-                    sh 'docker compose up -d'
+
+                    sh 'docker compose up -d' 
+
                 }
             }
         }
