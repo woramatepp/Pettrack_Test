@@ -41,18 +41,11 @@ services:
     image: it66070178/location:latest
     networks:
       - petnet
-    environment:
-      # หากคุณต้องการรัน ngrok ให้ใส่ NGROK_AUTHTOKEN ที่นี่
-      # NGROK_AUTHTOKEN: "YOUR_NGROK_TOKEN_HERE" 
-      # DATABASE_URL ถูกลบออก เพราะคุณไม่ใช้ DB แล้ว
 
   location2:
     image: it66070178/location:latest
     networks:
       - petnet
-    environment:
-      # NGROK_AUTHTOKEN: "YOUR_NGROK_TOKEN_HERE" 
-      # DATABASE_URL ถูกลบออก เพราะคุณไม่ใช้ DB แล้ว
 
   # -----------------------------------
   # Monitoring Services
