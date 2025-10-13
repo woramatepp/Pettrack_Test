@@ -1,7 +1,6 @@
 version: '3.9'
 
 services:
-
   frontend1:
     image: it66070178/frontend:latest
     networks:
@@ -11,7 +10,6 @@ services:
     image: it66070178/frontend:latest
     networks:
       - petnet
-
 
   user1:
     image: it66070178/user:latest
@@ -33,21 +31,20 @@ services:
     networks:
       - petnet
 
-location1:
-    image: it66070178/location:latest
-    networks:
-      - petnet
-    environment:
-      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N"
-location1:
-    image: it66070178/location:latest
-    networks:
-      - petnet
-    environment:
-      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N" 
-  # -----------------------------------
-  # Monitoring Services
-  # -----------------------------------
+  location1:
+    image: it66070178/location:latest
+    networks:
+      - petnet
+    environment:
+      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N"
+
+  location2:
+    image: it66070178/location:latest
+    networks:
+      - petnet
+    environment:
+      NGROK_AUTHTOKEN: "33z87GRfa18fZk0r06WNmQ0MOqX_6AZfGX92wv7WSjhink45N"
+
   nginx:
     image: nginx:latest
     container_name: pettrack_nginx_c
@@ -72,53 +69,4 @@ location1:
     container_name: nginx_exporter_c
     environment:
       - NGINX_SCRAPE_URI=http://nginx:80/nginx_status
-    networks:
-      - petnet
-    depends_on:
-      - nginx
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus_c
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    ports:
-      - "9090:9090"
-    networks:
-      - petnet
-    depends_on:
-      - nginx_exporter
-      - node_exporter
-
-  grafana:
-    image: grafana/grafana:10.4.4-ubuntu
-    container_name: grafana_c
-    user: "472"
-    ports:
-      - "3000:3000"
-    networks:
-      - petnet
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=strong_secure_password
-    volumes:
-      - grafana-storage:/var/lib/grafana
-    depends_on:
-      - prometheus
-
-  node_exporter:
-    image: prom/node-exporter:latest
-    container_name: node_exporter_c
-    ports:
-      - "9100:9100"
-    networks:
-      - petnet
-
-networks:
-  petnet:
-    driver: bridge
-
-volumes:
-  grafana-storage:
-  # volume สำหรับ postgres ถูกลบออก
+    networks
