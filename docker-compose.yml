@@ -1,116 +1,133 @@
 version: '3.9'
 
 services:
-  frontend1:
-    image: it66070178/frontend:latest
-    networks:
-      - petnet
+  # -----------------------------------
+  # Application Services
+  # -----------------------------------
+  frontend1:
+    image: it66070178/frontend:latest
+    networks:
+      - petnet
 
-  frontend2:
-    image: it66070178/frontend:latest
-    networks:
-      - petnet
+  frontend2:
+    image: it66070178/frontend:latest
+    networks:
+      - petnet
 
-  user1:
-    image: it66070178/user:latest
-    networks:
-      - petnet
+  # WARNING: user/pet/location services will likely fail if they rely on a database.
+  # If you don't need the database, ensure your app code is updated to remove DB connection logic.
 
-  user2:
-    image: it66070178/user:latest
-    networks:
-      - petnet
+  user1:
+    image: it66070178/user:latest
+    networks:
+      - petnet
 
-  pet1:
-    image: it66070178/pet:latest
-    networks:
-      - petnet
+  user2:
+    image: it66070178/user:latest
+    networks:
+      - petnet
 
-  pet2:
-    image: it66070178/pet:latest
-    networks:
-      - petnet
+  pet1:
+    image: it66070178/pet:latest
+    networks:
+      - petnet
 
-  location1:
-    image: it66070178/location:latest
-    networks:
-      - petnet
+  pet2:
+    image: it66070178/pet:latest
+    networks:
+      - petnet
 
-  location2:
-    image: it66070178/location:latest
-    networks:
-      - petnet
+  location1:
+    image: it66070178/location:latest
+    networks:
+      - petnet
+    environment:
+      # หากคุณต้องการรัน ngrok ให้ใส่ NGROK_AUTHTOKEN ที่นี่
+      # NGROK_AUTHTOKEN: "YOUR_NGROK_TOKEN_HERE" 
+      # DATABASE_URL ถูกลบออก เพราะคุณไม่ใช้ DB แล้ว
 
-  nginx:
-    image: nginx:latest
-    container_name: pettrack_nginx_c
-    ports:
-      - "8091:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    networks:
-      - petnet
-    depends_on:
-      - frontend1
-      - frontend2
-      - user1
-      - user2
-      - pet1
-      - pet2
-      - location1
-      - location2
+  location2:
+    image: it66070178/location:latest
+    networks:
+      - petnet
+    environment:
+      # NGROK_AUTHTOKEN: "YOUR_NGROK_TOKEN_HERE" 
+      # DATABASE_URL ถูกลบออก เพราะคุณไม่ใช้ DB แล้ว
 
-  nginx_exporter:
-    image: nginx/nginx-prometheus-exporter:latest
-    container_name: nginx_exporter_c
-    environment:
-      - NGINX_SCRAPE_URI=http://nginx:80/nginx_status
-    networks:
-      - petnet
-    depends_on:
-      - nginx
+  # -----------------------------------
+  # Monitoring Services
+  # -----------------------------------
+  nginx:
+    image: nginx:latest
+    container_name: pettrack_nginx_c
+    ports:
+      - "8091:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - petnet
+    depends_on:
+      - frontend1
+      - frontend2
+      - user1
+      - user2
+      - pet1
+      - pet2
+      - location1
+      - location2
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus_c
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    ports:
-      - "9090:9090"
-    networks:
-      - petnet
-    depends_on:
-      - nginx_exporter
-      - node_exporter
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx_exporter_c
+    environment:
+      - NGINX_SCRAPE_URI=http://nginx:80/nginx_status
+    networks:
+      - petnet
+    depends_on:
+      - nginx
 
-  grafana:
-    image: grafana/grafana:10.4.4-ubuntu 
-    container_name: grafana_c
-    user: "472"
-    ports:
-      - "3000:3000"
-    networks:
-      - petnet
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=strong_secure_password
-    volumes:
-      - grafana-storage:/var/lib/grafana
-    depends_on:
-      - prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus_c
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - petnet
+    depends_on:
+      - nginx_exporter
+      - node_exporter
 
-  node_exporter:
-    image: prom/node-exporter:latest
-    container_name: node_exporter_c
-    ports:
-      - "9100:9100"
-    networks:
-      - petnet
+  grafana:
+    image: grafana/grafana:10.4.4-ubuntu
+    container_name: grafana_c
+    user: "472"
+    ports:
+      - "3000:3000"
+    networks:
+      - petnet
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=strong_secure_password
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter_c
+    ports:
+      - "9100:9100"
+    networks:
+      - petnet
 
 networks:
-  petnet:
-    driver: bridge
+  petnet:
+    driver: bridge
 
 volumes:
-  grafana-storage: 
+  grafana-storage:
+  # volume สำหรับ postgres ถูกลบออก
