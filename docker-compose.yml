@@ -1,9 +1,7 @@
 version: '3.9'
 
 services:
-  # -----------------------------------
-  # Application Services
-  # -----------------------------------
+
   frontend1:
     image: it66070178/frontend:latest
     networks:
@@ -14,8 +12,6 @@ services:
     networks:
       - petnet
 
-  # WARNING: user/pet/location services will likely fail if they rely on a database.
-  # If you don't need the database, ensure your app code is updated to remove DB connection logic.
 
   user1:
     image: it66070178/user:latest
