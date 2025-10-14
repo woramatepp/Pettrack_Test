@@ -68,6 +68,36 @@ services:
       - "9090:9090"
     restart: always
 
+  # --- เพิ่ม Node Exporter ---
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    restart: always
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+
+  # --- เพิ่ม cAdvisor ---
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: always
+    ports:
+      - "8082:8080" # ใช้พอร์ต 8082 เพื่อไม่ให้ชนกับ Jenkins และ Frontend
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
   # --- เพิ่ม Jenkins Service ---
   jenkins:
     image: jenkins/jenkins:lts
