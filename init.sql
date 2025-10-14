@@ -31,3 +31,5 @@ CREATE TABLE locations (
     longitude real,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+\echo '✅ All tables created successfully!'
